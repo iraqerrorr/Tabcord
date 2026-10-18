@@ -1,4 +1,4 @@
-# Browser Discord Rich Presence (Opera GX and more)
+# Tabcord
 
 Show what you're doing in your browser on your Discord profile: which browser you're using, which tab is playing audio, and how many tabs you have open.
 
@@ -7,7 +7,7 @@ Watching: lofi hip hop radio
 in Opera GX · YouTube · 5 tabs
 ```
 
-Works with **Opera GX, Opera, Chrome, Edge and Brave** (tab mode), and detects **Vivaldi and Firefox** by window title (Windows only). The script is a single Python file with **no external dependencies**.
+Everything runs from one Python file, [`operagx_presence.py`](https://github.com/iraqerrorr/Tabcord/blob/main/operagx_presence.py), with **no external dependencies**. An optional browser extension adds per-tab info.
 
 > **Made with AI:** this project's code and documentation were written by an AI assistant ([Claude](https://claude.ai), made by Anthropic) at my request. See [AI disclosure](#ai-disclosure) below.
 >
@@ -17,8 +17,8 @@ Works with **Opera GX, Opera, Chrome, Edge and Brave** (tab mode), and detects *
 
 ## Features
 
-- Detects the browser you're using (Opera GX, Opera, Chrome, Edge, Firefox, Brave, Vivaldi)
-- **Tab mode** (with the included extension):
+- Detects your browser: Opera GX, Opera, Chrome, Edge, Firefox, Brave, Vivaldi
+- **Tab mode** (with the included extension), for Opera GX, Opera, Chrome, Edge and Brave:
   - Shows the tab that is actually **playing audio**, even in a background tab or another window
   - Falls back to your active tab when nothing is playing
   - Shows how many tabs you have open
@@ -27,7 +27,6 @@ Works with **Opera GX, Opera, Chrome, Edge and Brave** (tab mode), and detects *
 - **Window-title fallback** if the extension isn't installed (active tab only, Windows only)
 - Incognito / private tabs are never shared
 - Presence turns off automatically when you close the browser
-- Everything stays on your PC: the extension talks only to `127.0.0.1`
 
 ## How it works
 
@@ -39,9 +38,11 @@ Browser extension  --(HTTP POST, localhost only)-->  operagx_presence.py  --(Dis
 2. The script builds a status and sends it to the Discord desktop app over Discord's local IPC pipe.
 3. If the extension isn't running, the script reads the browser window title instead.
 
+`127.0.0.1` is "localhost" (this computer itself), so nothing leaves your PC.
+
 ## Requirements
 
-- Python 3.8 or newer (only needed to run or build the script)
+- Python 3.8 or newer
 - **Discord desktop app** running (the web version can't receive presence)
 - Windows for window-title detection. Tab mode and the Discord connection use standard IPC and should also work on macOS/Linux.
 
@@ -83,27 +84,11 @@ CLIENT_ID = "PASTE_YOUR_APPLICATION_ID_HERE"
 python operagx_presence.py
 ```
 
-Open the browser, play a video, and check your Discord profile.
-
-## Build a standalone `.exe` (Windows)
-
-Put `build_exe.bat` next to `operagx_presence.py` and double-click it, or run:
-
-```bash
-pip install pyinstaller
-pyinstaller --onefile --noconsole --name operagx_presence operagx_presence.py
-```
-
-The exe is created in `dist/`. Set your `CLIENT_ID` **before** building.
-Because of `--noconsole` it runs silently in the background; end `operagx_presence.exe` in Task Manager to stop it.
-
-To start it with Windows, press `Win + R`, type `shell:startup`, and put a shortcut to the exe in that folder.
-
-> Antivirus programs sometimes flag PyInstaller executables as false positives. You can run the `.py` file directly or build the exe yourself from this source.
+Open the browser, play a video, and check your Discord profile. Press `Ctrl+C` to stop; it clears your status on exit.
 
 ## Configuration
 
-All options are at the top of `operagx_presence.py`:
+Options are at the top of `operagx_presence.py`:
 
 | Option | Default | What it does |
 |---|---|---|
@@ -127,11 +112,11 @@ All options are at the top of `operagx_presence.py`:
 | Problem | Fix |
 |---|---|
 | Nothing shows on Discord | Use the **desktop** app, enable *Share your detected activities*, and make sure your status isn't Invisible |
-| "Can't reach Discord" in the log | Start Discord first, then the script |
+| "Can't reach Discord" in the output | Start Discord first, then the script |
 | Still not connecting | Run Discord and the script at the **same admin level** (normally both non-admin). Reinstall Discord if it asks for admin every launch |
 | Two Discord clients open | Close extras (Canary/PTB); Rich Presence works with one client |
 | Tab mode not working | Check the extension is enabled, and that nothing else is using port `47821` |
-| Status says it's busy on the port | The script is probably already running; close the other copy |
+| Message says the port is busy | The script is probably already running; close the other copy |
 | No logo on the profile | Upload art assets with the exact names listed above |
 
 ## Limitations
@@ -146,8 +131,7 @@ All options are at the top of `operagx_presence.py`:
 
 ```
 .
-├── operagx_presence.py     # main script (Discord IPC + local tab server)
-├── build_exe.bat           # builds a Windows exe with PyInstaller
+├── operagx_presence.py     # the script (Discord IPC + local tab server)
 ├── tab-extension/
 │   ├── manifest.json       # Manifest V3 extension
 │   └── background.js       # reports tabs to the local script
@@ -156,7 +140,7 @@ All options are at the top of `operagx_presence.py`:
 
 ## AI disclosure
 
-The script (`operagx_presence.py`), the browser extension (`tab-extension/`), the build script and this README were generated by **Claude**, an AI assistant made by Anthropic, based on my prompts and requirements.
+The script (`operagx_presence.py`), the browser extension (`tab-extension/`) and this README were generated by **Claude**, an AI assistant made by Anthropic, based on my prompts and requirements.
 
 AI-written code can contain bugs, so please read it and test it before relying on it. If you find a problem, open an issue or a pull request.
 
